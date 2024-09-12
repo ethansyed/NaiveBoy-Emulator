@@ -113,6 +113,8 @@ int main(int argc, char *argv[])
     else
     {
         loadROM();
+        CPU->run();
+        delete (CPU);
     }
 
     return 0;

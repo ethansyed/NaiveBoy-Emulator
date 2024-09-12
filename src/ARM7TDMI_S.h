@@ -5,16 +5,60 @@
 #define ARM_Regs 16
 class ARM7TDMI_S
 {
-private:
-    int32_t REGS[ARM_Regs]; // 16 register for ARMv4
-    int32_t CPSR;           // Prog Status Reg
-
-    // User mode or Supervisor mode
 public:
-    // Begins continuously cycling through instructions
-    void run();
-    // Runs n specified amount of cycles
-    void runNCycles(int n);
+    /**************************************************************/
+    /* External Functions                                         */
+    /**************************************************************/
+    void run();             // Continuously cycle through instructions
+    void runNCycles(int n); // Run n specified amount of cycles
+
+private:
+    /**************************************************************/
+    /* Status                                                     */
+    /**************************************************************/
+    int CYCLE_COUNT = 0;
+
+    // false - User
+    // true - System
+    bool systemMode = false;
+    bool privileged = false;
+
+    /**************************************************************/
+    /* Register Layout                                            */
+    /**************************************************************/
+
+    uint32_t REGS[ARM_Regs]; // 16 register for ARMv4
+    uint32_t CPSR;           // Prog Status Reg
+
+    struct
+    {
+        uint32_t fiq; // Fast Interrupt Request
+        uint32_t irq; // (General) Interupt Request
+        uint32_t svc; // Supervisor mode - handles software interrups (sys calls)
+        uint32_t abt; // Abort mode - mem faults / access violations
+        uint32_t und; // Undefined Mode - Undef/invalid ins
+    } spsr;
+
+    enum class Mode
+    {
+        User,
+        System,
+        FIQ,
+        IRQ,
+        Supervisor,
+        Abort,
+        Undefined,
+    } currentMode;
+
+    bool thumbMode = false;
+
+    /**************************************************************/
+    /* Internal Functions                                         */
+    /**************************************************************/
+    void cycle();
+    void Fetch();
+    void Decode();
+    void Execute();
 };
 
 #endif
